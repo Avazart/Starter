@@ -16,7 +16,12 @@
 namespace Bicycle
 {
 // ---------------------------------------------------------------------------
-std::size_t threadWindows(ulong threadId, std::vector<HWND>& windows);
+std::size_t enumerateWindows(std::vector<HWND>& windows,
+                             ulong threadId);
+
+std::size_t enumerateWindows(std::vector<HWND>& windows);
+
+HWND findWindowById(ulong threadId,unsigned procId);
 // ---------------------------------------------------------------------------
 struct ProcessError  // enum class
 {

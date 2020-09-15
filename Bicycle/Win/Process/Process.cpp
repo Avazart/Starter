@@ -338,7 +338,7 @@ void Process::closeWindows()
   if(isStarted() && !isFinished())
   {
     std::vector<HWND> windows;
-    if(threadWindows(threadId(),windows))
+    if(enumerateWindows(windows,threadId()))
     {
       for(std::size_t i=0; i<windows.size(); ++i)
         if(IsWindow(windows[i]))
@@ -347,7 +347,7 @@ void Process::closeWindows()
   }
 }
 //---------------------------------------------------------------------------
-BOOL CALLBACK enumThreadWndProc(HWND hwnd,LPARAM lParam)
+BOOL CALLBACK enumWindowsProc(HWND hwnd,LPARAM lParam) // WNDENUMPROC
 {
   std::vector<HWND>* windows=
     reinterpret_cast<std::vector<HWND>*>(lParam);
@@ -355,13 +355,37 @@ BOOL CALLBACK enumThreadWndProc(HWND hwnd,LPARAM lParam)
   return TRUE;
 }
 //---------------------------------------------------------------------------
-std::size_t Bicycle::threadWindows(Bicycle::ulong threadId,
-                                   std::vector<HWND>& windows)
+std::size_t Bicycle::enumerateWindows(std::vector<HWND>& windows,
+                                      ulong threadId)
 {
   windows.clear();
-  if(!EnumThreadWindows(threadId,&enumThreadWndProc,(LPARAM)&windows))
+  if(!EnumThreadWindows(threadId,
+                        &enumWindowsProc,
+                        reinterpret_cast<LPARAM>(&windows) ))
     throw SystemException();
   return windows.size();
 }
 //---------------------------------------------------------------------------
-
+std::size_t Bicycle::enumerateWindows(std::vector<HWND>& windows)
+{
+  windows.clear();
+  if(!EnumWindows(&enumWindowsProc,
+                  reinterpret_cast<LPARAM>(&windows) ))
+    throw SystemException();
+  return windows.size();
+}
+//---------------------------------------------------------------------------
+HWND Bicycle::findWindowById(ulong threadId, unsigned processId)
+{
+  std::vector<HWND> windows;
+  enumerateWindows(windows);
+  for(size_t i=0; i<windows.size(); ++i)
+  {
+      unsigned long prId= 0;
+      unsigned long thId= GetWindowThreadProcessId(windows[i],&prId);
+      if(thId == threadId && prId==processId)
+        return windows[i];
+  }
+  return NULL;
+}
+//---------------------------------------------------------------------------

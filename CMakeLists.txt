@@ -13,8 +13,9 @@ aux_source_directory(Bicycle/Win/Fs SRC_LIST)
 aux_source_directory(Bicycle/Algorithm SRC_LIST)
 
 find_library(Shlwapi_LIBRARY Shlwapi REQUIRED)
+find_library(User32_LIBRARY User32 REQUIRED)
 
 add_executable(Starter ${SRC_LIST})
 
-target_link_libraries(${PROJECT_NAME} ${Shlwapi_LIBRARY})
+target_link_libraries(${PROJECT_NAME} ${Shlwapi_LIBRARY} ${User32_LIBRARY})
 
